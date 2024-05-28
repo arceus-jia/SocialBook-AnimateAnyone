@@ -1,7 +1,5 @@
 # SocialBook-AnimateAnyone
 
-# SocialBook-Pose
-
 The first complete animate anyone code repository
 
 Shunran Jia,
