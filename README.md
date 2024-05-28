@@ -3,7 +3,7 @@
 The first complete animate anyone code repository
 
 Shunran Jia,
-Xuanhong Chen,
+[Xuanhong Chen](https://scholar.google.com/citations?user=UuCqlfEAAAAJ&hl=en),
 Wang Chen
 
 **_We plan to provide a complete set of animate anyone training code and high-quality training data in the next few days to help the community implement its own high-performance animate anyone training._**
