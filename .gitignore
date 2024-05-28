@@ -1,0 +1,10 @@
+__pycache__/
+logs/
+input/
+output/
+.DS_Store
+.git
+.vscode
+*.patch
+
+
