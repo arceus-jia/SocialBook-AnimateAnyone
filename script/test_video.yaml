@@ -3,10 +3,10 @@ pretrained_vae_path: "../pretrained_weights/sd-vae-ft-mse"
 image_encoder_path: "../pretrained_weights/image_encoder"
 
 
-denoising_unet_path: "/pretrained_weights/denoising_unet.pth"
-reference_unet_path: "/pretrained_weights/reference_unet.pth"
-pose_guider_path: "/pretrained_weights/pose_guider.pth"
-motion_module_path: "pretrained_weights/motion_module.pth"
+denoising_unet_path: "../pretrained_weights/denoising_unet.pth"
+reference_unet_path: "../pretrained_weights/reference_unet.pth"
+pose_guider_path: "../pretrained_weights/pose_guider.pth"
+motion_module_path: "../pretrained_weights/motion_module.pth"
 is_full_pose: True
 
 
@@ -15,6 +15,6 @@ weight_dtype: 'fp16'
 
 
 test_cases:
-  "../data/images/test2.jpg": 
+  "../data/images/asuna3.jpg": 
     - "../data/videos/ali11.mp4"
     - '../data/align_images/ali11.jpg'
