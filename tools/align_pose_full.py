@@ -22,7 +22,7 @@ from torchvision import transforms
 from transformers import CLIPVisionModelWithProjection
 import glob
 import torch.nn.functional as F
-from dwpose2 import DWposeDetector, draw_pose_simple
+from dwpose import DWposeDetector, draw_pose_simple
 import cv2
 import math
 

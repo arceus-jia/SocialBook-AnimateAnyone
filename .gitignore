@@ -6,5 +6,6 @@ output/
 .git
 .vscode
 *.patch
-
+pretrained_weights
+script/test_video.local.yaml
 

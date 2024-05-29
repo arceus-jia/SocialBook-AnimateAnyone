@@ -1,19 +1,13 @@
-pretrained_base_model_path: "../Moore-AnimateAnyone/pretrained_weights/stable-diffusion-v1-5/"
-pretrained_vae_path: "../Moore-AnimateAnyone/pretrained_weights/sd-vae-ft-mse"
-image_encoder_path: "../Moore-AnimateAnyone/pretrained_weights/image_encoder"
+pretrained_base_model_path: "../pretrained_weights/stable-diffusion-v1-5/"
+pretrained_vae_path: "../pretrained_weights/sd-vae-ft-mse"
+image_encoder_path: "../pretrained_weights/image_encoder"
 
 
-# denoising_unet_path: "/data2/models/maa/full_0514_2/stage1/denoising_unet-8160.pth"
-# reference_unet_path: "/data2/models/maa/full_0514_2/stage1/reference_unet-8160.pth"
-# pose_guider_path: "/data2/models/maa/full_0514_2/stage1/pose_guider-8160.pth"
-# motion_module_path: "/data2/models/maa/full_0514_2/stage2/motion_module-8728.pth"
-# is_full_pose: True
-
-denoising_unet_path: "/data2/models/maa/gfp_0326/stage1/denoising_unet-8100.pth"
-reference_unet_path: "/data2/models/maa/gfp_0326/stage1/reference_unet-8100.pth"
-pose_guider_path: "/data2/models/maa/gfp_0326/stage1/pose_guider-8100.pth"
-motion_module_path: "/data2/models/maa/gfp_0326/stage2/motion_module-7595.pth"
-is_full_pose: False
+denoising_unet_path: "/pretrained_weights/denoising_unet.pth"
+reference_unet_path: "/pretrained_weights/reference_unet.pth"
+pose_guider_path: "/pretrained_weights/pose_guider.pth"
+motion_module_path: "pretrained_weights/motion_module.pth"
+is_full_pose: True
 
 
 inference_config: "../Moore-AnimateAnyone/configs/inference/inference_v2.yaml"

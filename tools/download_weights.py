@@ -3,8 +3,7 @@ from pathlib import Path, PurePosixPath
 
 from huggingface_hub import hf_hub_download
 
-dirname = os.path.dirname(os.path.abspath(__file__))
-base_dir = os.path.join(dirname,'../Moore-AnimateAnyone')
+base_dir = os.path.dirname(os.path.abspath(__file__))
 
 def prepare_base_model():
     print(f'Preparing base stable-diffusion-v1-5 weights...')
@@ -67,10 +66,10 @@ def prepare_anyone():
     local_dir = os.path.join(base_dir,"./pretrained_weights")
     os.makedirs(local_dir, exist_ok=True)
     for hub_file in [
-        "denoising_unet.pth",
-        "motion_module.pth",
-        "pose_guider.pth",
-        "reference_unet.pth",
+        "public_full/denoising_unet.pth",
+        "public_full/motion_module.pth",
+        "public_full/pose_guider.pth",
+        "public_full/reference_unet.pth",
     ]:
         path = Path(hub_file)
         saved_path = local_dir / path
@@ -78,7 +77,7 @@ def prepare_anyone():
             continue
 
         hf_hub_download(
-            repo_id="xxx",
+            repo_id="shunran/SocialBook-AnimateAnyone",
             subfolder=PurePosixPath(path.parent),
             filename=PurePosixPath(path.name),
             local_dir=local_dir,

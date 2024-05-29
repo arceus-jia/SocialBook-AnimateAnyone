@@ -59,6 +59,12 @@ def parse_args():
     parser.add_argument("--fps", type=int)
 
     parser.add_argument("--skip", type=int, default=1)  # 插帧
+    parser.add_argument(
+        "--grid",
+        default=False,
+        action="store_true",
+        help="grid",
+    )     
     args = parser.parse_args()
 
     print("Width:", args.W)
@@ -274,7 +280,9 @@ def main():
             context_overlap=args.O,
         ).videos
 
-        video = torch.cat([ref_image_tensor, pose_tensor, video], dim=0)
+        if args.grid == True:
+            video = torch.cat([ref_image_tensor, pose_tensor, video], dim=0)
+            
         video = scale_video(video, width, height)
 
         m1 = config.pose_guider_path.split(".")[0].split("/")[-1]
