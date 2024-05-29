@@ -116,12 +116,14 @@ cd script
 python test_video.yaml -L 48 --grid
 ```
 Parameters:
+```
 -L: Frames count
 --grid: Enable grid overlay with pose/original_image
 --seed: seed
 -W: video width
 -H: video height
 --skip: frame interpolation
+```
 
 And you can see the output results in ```./output/```
 
