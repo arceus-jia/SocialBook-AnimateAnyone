@@ -20,9 +20,7 @@ We have implemented this model based on the [AnimateAnyone](https://github.com/H
 
 
 ## Demos
-
 <table class="center">
-    
 <tr>
     <td width=50% style="border: none">
     <video controls autoplay loop src="https://github.com/arceus-jia/SocialBook-AnimateAnyone/assets/5162767/8754fd0a-10b2-441f-aacb-89ac52ceb4c1" muted="false"></video>
@@ -39,6 +37,7 @@ We have implemented this model based on the [AnimateAnyone](https://github.com/H
         <video controls autoplay loop src="https://github.com/arceus-jia/SocialBook-AnimateAnyone/assets/5162767/1066bc5f-a8e9-441f-b709-7103c74620c5" muted="false"></video>
     </td>
 </tr>
+</table>
 
 ## TODO
 
