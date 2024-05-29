@@ -75,12 +75,11 @@ python tools/download_weights.py
 `pretrained_weights` structure is:
 ```
 ./pretrained_weights/
-|-- SocialBook-AnimateAnyone
-|   └── public_full
-|       |-- denoising_unet.pth
-|       |-- motion_module.pth
-|       |-- pose_guider.pth
-|       └── reference_unet.pth
+|-- public_full
+|   |-- denoising_unet.pth
+|   |-- motion_module.pth
+|   |-- pose_guider.pth
+|   └── reference_unet.pth
 |-- stable-diffusion-v1-5
 |   └── unet
 |       |-- config.json
@@ -113,7 +112,7 @@ And modify the 'script/test_video.yaml' file according to your configuration.
 #### Run inference
 ```bash
 cd script
-python test_video.yaml -L 48 --grid
+python test_video.py -L 48 --grid
 ```
 Parameters:
 ```
