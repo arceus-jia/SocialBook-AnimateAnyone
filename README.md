@@ -4,7 +4,9 @@ The first complete animate anyone code repository
 
 Shunran Jia,
 [Xuanhong Chen](https://github.com/neuralchen),
-Chen Wang
+Chen Wang,
+[Chenxi Yan](https://github.com/todochenxi)
+
 
 **_We plan to provide a complete set of animate anyone training code and high-quality training data in the next few days to help the community implement its own high-performance animate anyone training._**
 
