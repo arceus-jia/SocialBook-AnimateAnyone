@@ -61,7 +61,7 @@ def prepare_vae():
 
 
 def prepare_anyone():
-    return
+    # return
     print(f"Preparing AnimateAnyone weights...")
     local_dir = os.path.join(base_dir,"./pretrained_weights")
     os.makedirs(local_dir, exist_ok=True)
