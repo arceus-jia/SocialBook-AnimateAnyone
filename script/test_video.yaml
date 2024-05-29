@@ -3,10 +3,10 @@ pretrained_vae_path: "../pretrained_weights/sd-vae-ft-mse"
 image_encoder_path: "../pretrained_weights/image_encoder"
 
 
-denoising_unet_path: "../pretrained_weights/denoising_unet.pth"
-reference_unet_path: "../pretrained_weights/reference_unet.pth"
-pose_guider_path: "../pretrained_weights/pose_guider.pth"
-motion_module_path: "../pretrained_weights/motion_module.pth"
+denoising_unet_path: "../pretrained_weights/public_full/denoising_unet.pth"
+reference_unet_path: "../pretrained_weights/public_full/reference_unet.pth"
+pose_guider_path: "../pretrained_weights/public_full/pose_guider.pth"
+motion_module_path: "../pretrained_weights/public_full/motion_module.pth"
 is_full_pose: True
 
 

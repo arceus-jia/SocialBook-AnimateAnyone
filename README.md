@@ -74,10 +74,11 @@ python tools/download_weights.py
 ```
 ./pretrained_weights/
 |-- SocialBook-AnimateAnyone
-|   |-- denoising_unet.pth
-|   |-- motion_module.pth
-|   |-- pose_guider.pth
-|   └── reference_unet.pth
+|   └── public_full
+|       |-- denoising_unet.pth
+|       |-- motion_module.pth
+|       |-- pose_guider.pth
+|       └── reference_unet.pth
 |-- stable-diffusion-v1-5
 |   └── unet
 |       |-- config.json
