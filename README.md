@@ -10,9 +10,7 @@ We are SocialBook, you can experience our product through the link.
 </div>
 The first complete animate anyone code repository
 
-Shunran Jia,
-Zhengyan Tong (Shanghai Jiao Tong University),
-[Xuanhong Chen](https://github.com/neuralchen),
+Shunran Jia,[Xuanhong Chen](https://github.com/neuralchen),
 Chen Wang,
 [Chenxi Yan](https://github.com/todochenxi)
 
