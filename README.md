@@ -51,7 +51,9 @@ We have implemented this model based on the [AnimateAnyone](https://github.com/H
 ## TODO
 - [x] Release Inference Dode
 - [x] Gradio Demo
-- [ ] Training Code And Data
+- [ ] Add Face Enhancement
+- [ ] Build online test page
+- [ ] ReleaseTraining Code And Data
 ## News
 - [05/27/2024] Release Inference Code
 - [05/31/2024] Add a Gradio Demo
@@ -132,11 +134,13 @@ Parameters:
 -H: video height
 --skip: frame interpolation
 ```
-#### Gradio
+
+And you can see the output results in ```./output/```
+
+#### Gradio （beta, under developement）
 ```bash
 python app.py
 ```
 
-And you can see the output results in ```./output/```
 
 ### Training
