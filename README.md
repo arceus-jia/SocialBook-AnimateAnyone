@@ -1,5 +1,5 @@
 # SocialBook-AnimateAnyone
-We are SocialBook, you can experience our product through the link.
+We are SocialBook, you can experience our other products through these links.
 <div style="display: flex; align-items: center;">
   <a href="https://socialbook.io/" style="margin-right: 20px;">
     <img src="https://d35b8pv2lrtup8.cloudfront.net/assets/img/socialbook_logo.2020.357eed90add7705e54a8.svg" alt="SocialBook" width="200" height="100">
