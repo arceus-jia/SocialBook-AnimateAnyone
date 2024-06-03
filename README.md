@@ -1,10 +1,16 @@
 # SocialBook-AnimateAnyone
-
+We are SocialBook, you can experience our other products through these links.
+<div style="display: flex; align-items: center;">
+  <a href="https://socialbook.io/" style="margin-right: 20px;">
+    <img src="https://d35b8pv2lrtup8.cloudfront.net/assets/img/socialbook_logo.2020.357eed90add7705e54a8.svg" alt="SocialBook" width="200" height="100">
+  </a>
+  <a href="https://dreampal.socialbook.io/">
+    <img src="https://d35b8pv2lrtup8.cloudfront.net/assets/img/logo.ce05d254bbdb2d417c4f.svg" alt="DreamPal" width="200" height="100">
+  </a>
+</div>
 The first complete animate anyone code repository
 
-Shunran Jia,
-Zhengyan Tong (Shanghai Jiao Tong University),
-[Xuanhong Chen](https://github.com/neuralchen),
+Shunran Jia,[Xuanhong Chen](https://github.com/neuralchen),
 Chen Wang,
 [Chenxi Yan](https://github.com/todochenxi)
 
@@ -43,10 +49,14 @@ We have implemented this model based on the [AnimateAnyone](https://github.com/H
 </table>
 
 ## TODO
-
+- [x] Release Inference Dode
+- [x] Gradio Demo
+- [ ] Add Face Enhancement
+- [ ] Build online test page
+- [ ] ReleaseTraining Code And Data
 ## News
 - [05/27/2024] Release Inference Code
-
+- [05/31/2024] Add a Gradio Demo
 # Getting Started
 
 ## Installation
@@ -134,9 +144,15 @@ Parameters:
 ```
 And you can see the output results in ```./output/```
 
-If you want to do facial repair on a video (only for videos of REALPERSON)
+If you want to do facial repair on a video (only for videos of REAL PERSON)
 ```bash
 python restore_face.py --ref_image xxx.jpg --input xxx.mp4 --output xxx.mp4
 ```
+
+#### Gradio （beta, under developement）
+```bash
+python app.py
+```
+
 
 ### Training
