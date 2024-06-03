@@ -23,6 +23,8 @@ import torch.nn.functional as F
 from dwpose import DWposeDetector
 import cv2
 import math
+import argparse
+import time
 
 from configs.prompts.test_cases import TestCasesDict
 from src.models.pose_guider import PoseGuider
@@ -37,49 +39,21 @@ INF_WIDTH = 768
 INF_HEIGHT = 768
 
 
-class Args:
-    def __init__(self):
-        self.W = 512
-        self.H = 896
-        self.L = 124
-        self.S = 24
-        self.O = 4
-        self.cfg = 3.5
-        self.seed = 42
-        self.steps = 20
-        self.fps = None
-        self.skip = 1
-        self.grid = False
+def parse_args():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--config", type=str, default="script/gradio_config.yaml")
+    parser.add_argument("--fps", type=int)
+    parser.add_argument(
+        "--grid",
+        default=False,
+        action="store_true",
+        help="grid",
+    )      
+    parser.add_argument("--share", default=False, action="store_true")
+    parser.add_argument('--port', type=int, default=7860)
 
-        self.pretrained_base_model_path = "./pretrained_weights/stable-diffusion-v1-5/"
-        self.pretrained_vae_path = "./pretrained_weights/sd-vae-ft-mse"
-        self.image_encoder_path = "./pretrained_weights/image_encoder"
-        self.denoising_unet_path = "./pretrained_weights/public_full/denoising_unet.pth"
-        self.reference_unet_path = "./pretrained_weights/public_full/reference_unet.pth"
-        self.pose_guider_path = "./pretrained_weights/public_full/pose_guider.pth"
-        self.motion_module_path = "./pretrained_weights/public_full/motion_module.pth"
-        self.is_full_pose = True
-        self.inference_config = "./Moore-AnimateAnyone/configs/inference/inference_v2.yaml"
-        self.weight_dtype = 'fp16'
-
-    def print_args(self):
-        print("Width:", self.W)
-        print("Height:", self.H)
-        print("Length:", self.L)
-        print("Slice:", self.S)
-        print("Overlap:", self.O)
-        print("Classifier free guidance:", self.cfg)
-        print("DDIM sampling steps :", self.steps)
-        print("Pretrained base model path:", self.pretrained_base_model_path)
-        print("Pretrained VAE path:", self.pretrained_vae_path)
-        print("Image encoder path:", self.image_encoder_path)
-        print("Denoising U-Net path:", self.denoising_unet_path)
-        print("Reference U-Net path:", self.reference_unet_path)
-        print("Pose guider path:", self.pose_guider_path)
-        print("Motion module path:", self.motion_module_path)
-        print("Is full pose:", self.is_full_pose)
-        print("Inference config path:", self.inference_config)
-        print("Weight data type:", self.weight_dtype)
+    args = parser.parse_args()
+    return args
 
 
 def crop_center_and_resize(img, target_width, target_height):
@@ -130,10 +104,13 @@ def scale_video(video, width, height):
     return scaled_video
 
 
-def inference(align_image, input_video, ref_image):
-    args = Args()
+def inference(align_image, input_video, ref_image, W, H, cfg, seed, steps, skip):
+    print("parms------------>", W, H, cfg, seed, skip)
+    W, H, cfg, seed, steps, skip = int(W), int(H), float(cfg), int(seed), int(steps), int(skip) 
+    args = parse_args()
+    config = OmegaConf.load(args.config)
     print("load===")
-    if args.is_full_pose:
+    if config.is_full_pose:
         from tools.align_pose_full import handle_video
         pose_folder = 'pose_full'
     else:
@@ -142,25 +119,25 @@ def inference(align_image, input_video, ref_image):
     pose_folder = os.path.join(dirname,'./output/',pose_folder)
     os.makedirs(pose_folder,exist_ok=True)
 
-    if args.weight_dtype == "fp16":
+    if config.weight_dtype == "fp16":
         weight_dtype = torch.float16
     else:
         weight_dtype = torch.float32
 
     vae = AutoencoderKL.from_pretrained(
-        args.pretrained_vae_path,
+        config.pretrained_vae_path,
     ).to("cuda", dtype=weight_dtype)
 
     reference_unet = UNet2DConditionModel.from_pretrained(
-        args.pretrained_base_model_path,
+        config.pretrained_base_model_path,
         subfolder="unet",
     ).to(dtype=weight_dtype, device="cuda")
 
-    inference_config_path = args.inference_config
+    inference_config_path = config.inference_config
     infer_config = OmegaConf.load(inference_config_path)
     denoising_unet = UNet3DConditionModel.from_pretrained_2d(
-        args.pretrained_base_model_path,
-        args.motion_module_path,
+        config.pretrained_base_model_path,
+        config.motion_module_path,
         subfolder="unet",
         unet_additional_kwargs=infer_config.unet_additional_kwargs,
     ).to(dtype=weight_dtype, device="cuda")
@@ -170,26 +147,26 @@ def inference(align_image, input_video, ref_image):
     )
 
     image_enc = CLIPVisionModelWithProjection.from_pretrained(
-        args.image_encoder_path
+        config.image_encoder_path
     ).to(dtype=weight_dtype, device="cuda")
 
     sched_kwargs = OmegaConf.to_container(infer_config.noise_scheduler_kwargs)
     scheduler = DDIMScheduler(**sched_kwargs)
 
-    generator = torch.manual_seed(args.seed)
+    generator = torch.manual_seed(seed)
 
-    width, height = args.W, args.H
+    width, height = W, H
 
     # load pretrained weights
     denoising_unet.load_state_dict(
-        torch.load(args.denoising_unet_path, map_location="cpu"),
+        torch.load(config.denoising_unet_path, map_location="cpu"),
         strict=False,
     )
     reference_unet.load_state_dict(
-        torch.load(args.reference_unet_path, map_location="cpu"),
+        torch.load(config.reference_unet_path, map_location="cpu"),
     )
     pose_guider.load_state_dict(
-        torch.load(args.pose_guider_path, map_location="cpu"),
+        torch.load(config.pose_guider_path, map_location="cpu"),
     )
 
     pipe = Pose2VideoPipeline(
@@ -228,7 +205,7 @@ def inference(align_image, input_video, ref_image):
             return obj
 
     def handle_single(ref_image, input_video, align_image):
-        print("handle===", args.motion_module_path)
+        print("handle===", config.motion_module_path)
         align_image_pil = convert_to_pil_image(align_image)
         ref_image_pil = convert_to_pil_image(ref_image)
 
@@ -256,14 +233,14 @@ def inference(align_image, input_video, ref_image):
         pose_images = read_frames(pose_video_path)
         src_fps = get_fps(pose_video_path)
         print(f"pose video has {len(pose_images)} frames, with {src_fps} fps")
-        L = min(args.L, len(pose_images))
+        L = min(config.L, len(pose_images))
         pose_transform = transforms.Compose(
             [transforms.Resize((INF_HEIGHT, INF_WIDTH)), transforms.ToTensor()]
         )
 
-        pose_images = pose_images[:: args.skip + 1]
-        src_fps = src_fps // (args.skip + 1)
-        L = L // ((args.skip + 1))
+        pose_images = pose_images[:: skip + 1]
+        src_fps = src_fps // (skip + 1)
+        L = L // ((skip + 1))
 
         for pose_image_pil in pose_images[:L]:
             # 理论上wh和pose一致，最多缩放一下
@@ -291,12 +268,12 @@ def inference(align_image, input_video, ref_image):
             INF_WIDTH,
             INF_HEIGHT,
             L,
-            args.steps,
-            args.cfg,
+            steps,
+            cfg,
             generator=generator,
-            context_frames=args.S,
+            context_frames=24, # video slice frame number
             context_stride=1,
-            context_overlap=args.O,
+            context_overlap=4, # video slice overlap frame number
         ).videos
 
         if args.grid == True:
@@ -304,13 +281,13 @@ def inference(align_image, input_video, ref_image):
             
         video = scale_video(video, width, height)
 
-        m1 = args.pose_guider_path.split(".")[0].split("/")[-1]
-        m2 = args.motion_module_path.split(".")[0].split("/")[-1]
+        m1 = config.pose_guider_path.split(".")[0].split("/")[-1]
+        m2 = config.motion_module_path.split(".")[0].split("/")[-1]
 
-        save_dir_name = f"{time_str}-{args.cfg}-{m1}-{m2}"
+        save_dir_name = f"{time_str}-{cfg}-{m1}-{m2}"
         save_dir = Path(os.path.join(dirname,"./output/",f"video-{date_str}/{save_dir_name}"))
         save_dir.mkdir(exist_ok=True, parents=True)
-        video_path = f"{save_dir}/{str(uuid.uuid4())}_{args.cfg}_{args.seed}_{args.skip}_{m1}_{m2}.mp4"
+        video_path = f"{save_dir}/{str(uuid.uuid4())}_{cfg}_{seed}_{skip}_{m1}_{m2}.mp4"
         save_videos_grid(
             video,
             video_path,
@@ -322,51 +299,76 @@ def inference(align_image, input_video, ref_image):
     return handle_single(ref_image, input_video, align_image)
     
 
-def clear_media(align_image, input_video, ref_image, output_video):
-    return gr.Image.update(value=None), gr.Video.update(value=None), gr.Image.update(value=None), gr.Video.update(value=None)
-with gr.Blocks() as demo:
-    gr.Markdown(
-        """
-# SocialBook-AnimateAnyone
-## We are SocialBook, you can experience our product through the link.
-<div style="display: flex; align-items: center;">
-  <a href="https://socialbook.io/" style="margin-right: 20px;">
-    <img src="https://d35b8pv2lrtup8.cloudfront.net/assets/img/socialbook_logo.2020.357eed90add7705e54a8.svg" alt="SocialBook" width="200" height="100">
-  </a>
-  <a href="https://dreampal.socialbook.io/">
-    <img src="https://d35b8pv2lrtup8.cloudfront.net/assets/img/logo.ce05d254bbdb2d417c4f.svg" alt="DreamPal" width="200" height="100">
-  </a>
-</div>
 
-The first complete animate anyone code repository
+def main():
+    args = parse_args()
+    config = OmegaConf.load(args.config)
+    def clear_media(align_image, input_video, ref_image, output_video):
+        return gr.Image.update(value=None), gr.Video.update(value=None), gr.Image.update(value=None), gr.Video.update(value=None)
 
-[Shunran Jia](https://github.com/arceus-jia), Zhengyan Tong (Shanghai Jiao Tong University), [Xuanhong Chen](https://github.com/neuralchen), [Chen Wang](https://socialbook.io/), [Chenxi Yan](https://github.com/todochenxi)
-        """)
-    with gr.Row():
-        with gr.Column():
-            align_image = gr.Image(souce=["upload", "clipboard"], label="Align Image(a standard frame of a person's pose from the dance_video)")
-            input_video = gr.Video(souce=["upload", "clipboard"],label="Dance Video")  
-        with gr.Column():  
-            ref_image = gr.Image(souce=["upload", "clipboard"],label="New Image")
-            output_video = gr.Video(label="Result")
-    with gr.Row():
-        clean = gr.Button("Clean")
-        run = gr.Button("Generate")
-    ex_data = [
-        ["data/align_images/ali11.jpg", "data/videos/ali11.mp4", "data/images/head2.png"],
-        ["data/align_images/ali11.jpg", "data/videos/ali12.mp4", "data/images/asuna3.jpg"],
-        ["data/align_images/ali11.jpg", "data/videos/ali11.mp4", "data/images/mbg1.jpg"]
-    ]
-    examples_component = gr.Examples(examples=ex_data, inputs=[align_image, input_video, ref_image], outputs=[output_video], fn=inference, label="Examples", cache_examples=False, run_on_click=True)
-    clean.click(clear_media, [align_image, input_video, ref_image, output_video], [align_image, input_video, ref_image, output_video])
-    run.click(inference, [align_image, input_video, ref_image], [output_video])
+    def get_image(input_video):
+        st = time.time()
+        video = cv2.VideoCapture(input_video)
+        ret, first_frame = video.read()
+        if ret:
+            # 转换OpenCV图像为PIL图像
+            pil_image = cv2.cvtColor(first_frame, cv2.COLOR_BGR2RGB)
+            video.release()
+            print("----------------->",time.time() -st)
+            return gr.Image.update(value=pil_image)
+
+    with gr.Blocks() as demo:
+        gr.Markdown(
+            """
+    # SocialBook-AnimateAnyone
+    ## We are SocialBook, you can experience our other products through these links.
+    <div style="display: flex; align-items: center;">
+    <a href="https://socialbook.io/" style="margin-right: 20px;">
+        <img src="https://d35b8pv2lrtup8.cloudfront.net/assets/img/socialbook_logo.2020.357eed90add7705e54a8.svg" alt="SocialBook" width="200" height="100">
+    </a>
+    <a href="https://dreampal.socialbook.io/">
+        <img src="https://d35b8pv2lrtup8.cloudfront.net/assets/img/logo.ce05d254bbdb2d417c4f.svg" alt="DreamPal" width="200" height="100">
+    </a>
+    </div>
+
+    The first complete animate anyone code repository
+
+    [Shunran Jia](https://github.com/arceus-jia), Zhengyan Tong (Shanghai Jiao Tong University), [Xuanhong Chen](https://github.com/neuralchen), [Chen Wang](https://socialbook.io/), [Chenxi Yan](https://github.com/todochenxi)
+            """)
+        with gr.Row():
+            with gr.Column():
+                input_video = gr.Video(souce=["upload", "clipboard"],label="Dance Video")
+                align_image = gr.Image(souce=["upload", "clipboard"], label="Align Image(Upload a Dance Video and you will automatically get the aligned image.)", interactive=False)  
+            with gr.Column(): 
+                output_video = gr.Video(label="Result", interactive=False) 
+                ref_image = gr.Image(souce=["upload", "clipboard"],label="New Image")
+        with gr.Row():
+            W = gr.Textbox(label="Width", value=512)
+            H = gr.Textbox(label="Height", value=896)
+            cfg = gr.Textbox(label="cfg(Classifier free guidance)", value=3.5)
+            seed = gr.Textbox(label="seed(DDIM sampling steps)", value=42)
+            steps = gr.Textbox(label="steps", value=20)
+            skip = gr.Textbox(label="skip(Frame Insertion)", value=1)
+        with gr.Row():
+            clean = gr.Button("Clean")
+            run = gr.Button("Generate")
+        ex_data = OmegaConf.to_container(config.examples)
+        examples_component = gr.Examples(examples=ex_data, inputs=[align_image, input_video, ref_image], outputs=[output_video], fn=inference, label="Examples", cache_examples=False, run_on_click=True)
+        clean.click(clear_media, [align_image, input_video, ref_image, output_video], [align_image, input_video, ref_image, output_video])
+        run.click(inference, [align_image, input_video, ref_image, W, H, cfg, seed, steps, skip], [output_video])
+        input_video.change(get_image, input_video, align_image)
+    demo.queue()
+    demo.launch(share=args.share,
+                debug=True,
+                server_name="0.0.0.0",
+                server_port=args.port
+    )
 
 
-demo.launch(share=False,
-             debug=False,
-             server_name="0.0.0.0",
-             server_port=7860
-)
+if __name__ == "__main__":
+    main()
+
+
     
 
 
