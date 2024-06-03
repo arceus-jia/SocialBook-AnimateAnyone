@@ -51,7 +51,7 @@ We have implemented this model based on the [AnimateAnyone](https://github.com/H
 ## TODO
 - [x] Release Inference Dode
 - [x] Gradio Demo
-- [ ] Add Face Enhancement
+- [x] Add Face Enhancement
 - [ ] Build online test page
 - [ ] ReleaseTraining Code And Data
 ## News
