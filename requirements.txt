@@ -30,3 +30,7 @@ xformers==0.0.22
 controlnet-aux==0.0.7
 
 moviepy
+basicsr
+gfpgan
+onnxruntime-gpu
+insightface==0.7.3

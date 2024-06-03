@@ -71,6 +71,14 @@ mim install "mmpose>=1.1.0"
 ### Download weights
 ```bash
 python tools/download_weights.py
+
+#optional
+mkdir -p pretrained_weights/inswapper
+wget -O pretrained_weights/inswapper/inswapper_128.onnx  https://github.com/facefusion/facefusion-assets/releases/download/models/inswapper_128.onnx
+
+mkdir -p pretrained_weights/gfp
+wget -O pretrained_weights/gfp/GFPGANv1.4.pth https://github.com/TencentARC/GFPGAN/releases/download/v1.3.0/GFPGANv1.4.pth
+
 ```
 
 `pretrained_weights` structure is:
@@ -124,7 +132,11 @@ Parameters:
 -H: video height
 --skip: frame interpolation
 ```
-
 And you can see the output results in ```./output/```
+
+If you want to do facial repair on a video (only for videos of REALPERSON)
+```bash
+python restore_face.py --ref_image xxx.jpg --input xxx.mp4 --output xxx.mp4
+```
 
 ### Training

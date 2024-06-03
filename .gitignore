@@ -8,4 +8,5 @@ output/
 *.patch
 pretrained_weights
 script/test_video.local.yaml
-
+script/gfpgan
+*/__pycache__
