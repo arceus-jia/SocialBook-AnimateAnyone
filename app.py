@@ -337,11 +337,11 @@ def main():
             """)
         with gr.Row():
             with gr.Column():
-                input_video = gr.Video(souce=["upload", "clipboard"],label="Dance Video")
-                align_image = gr.Image(souce=["upload", "clipboard"], label="Align Image(Upload a Dance Video and you will automatically get the aligned image.)", interactive=False)  
+                input_video = gr.Video(sources=["upload", "clipboard"],label="Dance Video")
+                align_image = gr.Image(sources=["upload", "clipboard"], label="Align Image")  
             with gr.Column(): 
                 output_video = gr.Video(label="Result", interactive=False) 
-                ref_image = gr.Image(souce=["upload", "clipboard"],label="New Image")
+                ref_image = gr.Image(sources=["upload", "clipboard"],label="New Image")
         with gr.Row():
             W = gr.Textbox(label="Width", value=512)
             H = gr.Textbox(label="Height", value=896)
@@ -350,13 +350,14 @@ def main():
             steps = gr.Textbox(label="steps", value=20)
             skip = gr.Textbox(label="skip(Frame Insertion)", value=1)
         with gr.Row():
+            get_align_image = gr.Button("Get Align Image(get the aligned image from dance video)")
             clean = gr.Button("Clean")
             run = gr.Button("Generate")
         ex_data = OmegaConf.to_container(config.examples)
         examples_component = gr.Examples(examples=ex_data, inputs=[align_image, input_video, ref_image], outputs=[output_video], fn=inference, label="Examples", cache_examples=False, run_on_click=True)
         clean.click(clear_media, [align_image, input_video, ref_image, output_video], [align_image, input_video, ref_image, output_video])
         run.click(inference, [align_image, input_video, ref_image, W, H, cfg, seed, steps, skip], [output_video])
-        input_video.change(get_image, input_video, align_image)
+        get_align_image.click(get_image, input_video, align_image)
     demo.queue()
     demo.launch(share=args.share,
                 debug=True,
