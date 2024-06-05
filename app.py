@@ -42,13 +42,7 @@ INF_HEIGHT = 768
 def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument("--config", type=str, default="script/gradio_config.yaml")
-    parser.add_argument("--fps", type=int)
-    parser.add_argument(
-        "--grid",
-        default=False,
-        action="store_true",
-        help="grid",
-    )      
+    parser.add_argument("--fps", type=int)    
     parser.add_argument("--share", default=False, action="store_true")
     parser.add_argument('--port', type=int, default=7860)
 
@@ -104,8 +98,10 @@ def scale_video(video, width, height):
     return scaled_video
 
 
-def inference(align_image, input_video, ref_image, W, H, cfg, seed, steps, skip):
-    print("parms------------>", W, H, cfg, seed, skip)
+def inference(align_image, input_video, ref_image, W, H, cfg, seed, steps, skip,grid):
+    if W is None:
+        return
+    print("params------------>", W, H, cfg, seed, skip)
     W, H, cfg, seed, steps, skip = int(W), int(H), float(cfg), int(seed), int(steps), int(skip) 
     args = parse_args()
     config = OmegaConf.load(args.config)
@@ -276,7 +272,7 @@ def inference(align_image, input_video, ref_image, W, H, cfg, seed, steps, skip)
             context_overlap=4, # video slice overlap frame number
         ).videos
 
-        if args.grid == True:
+        if grid == True:
             video = torch.cat([ref_image_tensor, pose_tensor, video], dim=0)
             
         video = scale_video(video, width, height)
@@ -298,7 +294,6 @@ def inference(align_image, input_video, ref_image, W, H, cfg, seed, steps, skip)
 
     return handle_single(ref_image, input_video, align_image)
     
-
 
 def main():
     args = parse_args()
@@ -333,30 +328,30 @@ def main():
 
     The first complete animate anyone code repository
 
-    [Shunran Jia](https://github.com/arceus-jia), Zhengyan Tong (Shanghai Jiao Tong University), [Xuanhong Chen](https://github.com/neuralchen), [Chen Wang](https://socialbook.io/), [Chenxi Yan](https://github.com/todochenxi)
+    [Shunran Jia](https://github.com/arceus-jia),[Xuanhong Chen](https://github.com/neuralchen), [Chen Wang](https://socialbook.io/), [Chenxi Yan](https://github.com/todochenxi)
             """)
+        with gr.Row(equal_height = True):
+            ref_image = gr.Image(sources=["upload", "clipboard"],label="Ref Image",height=300)
+            input_video = gr.Video(sources=["upload", "clipboard"],label="Dance Video",height=300)
+            align_image = gr.Image(sources=["upload", "clipboard"], label="Align Image",height=300)  
         with gr.Row():
-            with gr.Column():
-                input_video = gr.Video(sources=["upload", "clipboard"],label="Dance Video")
-                align_image = gr.Image(sources=["upload", "clipboard"], label="Align Image")  
-            with gr.Column(): 
-                output_video = gr.Video(label="Result", interactive=False) 
-                ref_image = gr.Image(sources=["upload", "clipboard"],label="New Image")
+            output_video = gr.Video(label="Result", interactive=False,height=300) 
         with gr.Row():
             W = gr.Textbox(label="Width", value=512)
-            H = gr.Textbox(label="Height", value=896)
+            H = gr.Textbox(label="Height", value=768)
             cfg = gr.Textbox(label="cfg(Classifier free guidance)", value=3.5)
             seed = gr.Textbox(label="seed(DDIM sampling steps)", value=42)
             steps = gr.Textbox(label="steps", value=20)
             skip = gr.Textbox(label="skip(Frame Insertion)", value=1)
+            grid = gr.Checkbox(label='use grid(show pose in result)', value=1)
         with gr.Row():
-            get_align_image = gr.Button("Get Align Image(get the aligned image from dance video)")
-            clean = gr.Button("Clean")
+            get_align_image = gr.Button("Extract Align Image from video if ineed")
             run = gr.Button("Generate")
+            clean = gr.Button("Clean")
         ex_data = OmegaConf.to_container(config.examples)
-        examples_component = gr.Examples(examples=ex_data, inputs=[align_image, input_video, ref_image], outputs=[output_video], fn=inference, label="Examples", cache_examples=False, run_on_click=True)
+        examples_component = gr.Examples(examples=ex_data, inputs=[align_image, input_video, ref_image],  fn=inference, label="Examples", cache_examples=False, run_on_click=True)
         clean.click(clear_media, [align_image, input_video, ref_image, output_video], [align_image, input_video, ref_image, output_video])
-        run.click(inference, [align_image, input_video, ref_image, W, H, cfg, seed, steps, skip], [output_video])
+        run.click(inference, [align_image, input_video, ref_image, W, H, cfg, seed, steps, skip,grid], [output_video])
         get_align_image.click(get_image, input_video, align_image)
     demo.queue()
     demo.launch(share=args.share,

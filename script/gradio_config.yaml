@@ -23,10 +23,10 @@ examples:
     - data/videos/ali11.mp4 
     - data/images/head2.png
   -
-    - data/align_images/ali11.jpg
-    - data/videos/ali12.mp4
-    - data/images/asuna3.jpg
-  -
-    - data/align_images/ali11.jpg 
-    - data/videos/ali11.mp4
+    - data/align_images/d2.jpg
+    - data/videos/d2.mp4
     - data/images/mbg1.jpg
+  -
+    - data/align_images/ubc1.jpg 
+    - data/videos/ubc1.mp4
+    - data/images/model1.jpg

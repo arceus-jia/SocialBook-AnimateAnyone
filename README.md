@@ -48,6 +48,12 @@ We have implemented this model based on the [AnimateAnyone](https://github.com/H
 </tr>
 </table>
 
+## Try it online
+You can try it out on our demos page now!
+
+<a href = 'http://ai.socialbook.com.cn:48001'>Click to try</a>
+
+
 ## TODO
 - [x] Release Inference Dode
 - [x] Gradio Demo

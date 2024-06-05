@@ -10,3 +10,4 @@ pretrained_weights
 script/test_video.local.yaml
 script/gfpgan
 */__pycache__
+script/gradio_config.local.yaml
