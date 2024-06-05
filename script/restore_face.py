@@ -67,3 +67,5 @@ def handle_video(ref_image_path, input_video_path, output_video_path):
 if __name__ == "__main__":
     args = parse_args()
     handle_video(args.ref_image, args.input, args.output)
+
+#  python restore_face.py --input ../input/swap/test2.mp4 --output ../output/test2.mp4 --ref_image ../data/images/test2.jpg
