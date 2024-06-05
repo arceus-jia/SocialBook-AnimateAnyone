@@ -1,0 +1,32 @@
+pretrained_base_model_path: "pretrained_weights/stable-diffusion-v1-5/"
+pretrained_vae_path: "pretrained_weights/sd-vae-ft-mse"
+image_encoder_path: "pretrained_weights/image_encoder"
+
+
+denoising_unet_path: "pretrained_weights/public_full/denoising_unet.pth"
+reference_unet_path: "pretrained_weights/public_full/reference_unet.pth"
+pose_guider_path: "pretrained_weights/public_full/pose_guider.pth"
+motion_module_path: "pretrained_weights/public_full/motion_module.pth"
+is_full_pose: True
+
+
+inference_config: "Moore-AnimateAnyone/configs/inference/inference_v2.yaml"
+weight_dtype: 'fp16'
+
+# video frame length
+L: 240
+
+# Gradio Examples
+examples:
+  - 
+    - data/align_images/ali11.jpg
+    - data/videos/ali11.mp4 
+    - data/images/head2.png
+  -
+    - data/align_images/ali11.jpg
+    - data/videos/ali12.mp4
+    - data/images/asuna3.jpg
+  -
+    - data/align_images/ali11.jpg 
+    - data/videos/ali11.mp4
+    - data/images/mbg1.jpg
