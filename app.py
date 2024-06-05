@@ -345,7 +345,7 @@ def main():
             skip = gr.Textbox(label="skip(Frame Insertion)", value=1)
             grid = gr.Checkbox(label='use grid(show pose in result)', value=1)
         with gr.Row():
-            get_align_image = gr.Button("Extract Align Image from video if ineed")
+            get_align_image = gr.Button("Extract Align Image from video if needed")
             run = gr.Button("Generate")
             clean = gr.Button("Clean")
         ex_data = OmegaConf.to_container(config.examples)
