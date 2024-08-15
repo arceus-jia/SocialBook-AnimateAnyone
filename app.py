@@ -102,7 +102,7 @@ def inference(align_image, input_video, ref_image, W, H,L, cfg, seed, steps, ski
     if W is None:
         return
     print("params------------>", W, H, cfg, seed, skip)
-    W, H, cfg, seed, steps, skip = int(W), int(H), float(cfg), int(seed), int(steps), int(skip) 
+    W, H,L, cfg, seed, steps, skip = int(W), int(H),int(L), float(cfg), int(seed), int(steps), int(skip) 
     args = parse_args()
     config = OmegaConf.load(args.config)
     print("load===")
