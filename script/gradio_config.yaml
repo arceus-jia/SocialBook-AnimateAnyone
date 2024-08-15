@@ -7,7 +7,8 @@ denoising_unet_path: "pretrained_weights/public_full/denoising_unet.pth"
 reference_unet_path: "pretrained_weights/public_full/reference_unet.pth"
 pose_guider_path: "pretrained_weights/public_full/pose_guider.pth"
 motion_module_path: "pretrained_weights/public_full/motion_module.pth"
-is_full_pose: True
+pose_type: full
+use_clip: true
 
 
 inference_config: "Moore-AnimateAnyone/configs/inference/inference_v2.yaml"

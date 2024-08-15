@@ -98,7 +98,7 @@ def scale_video(video, width, height):
     return scaled_video
 
 
-def inference(align_image, input_video, ref_image, W, H, cfg, seed, steps, skip,grid):
+def inference(align_image, input_video, ref_image, W, H,L, cfg, seed, steps, skip,grid):
     if W is None:
         return
     print("params------------>", W, H, cfg, seed, skip)
@@ -106,12 +106,16 @@ def inference(align_image, input_video, ref_image, W, H, cfg, seed, steps, skip,
     args = parse_args()
     config = OmegaConf.load(args.config)
     print("load===")
-    if config.is_full_pose:
+    pose_type = config.pose_type
+    if pose_type == "full":
         from tools.align_pose_full import handle_video
-        pose_folder = 'pose_full'
+        pose_folder = "pose_full"
     else:
         from tools.align_pose import handle_video
-        pose_folder = 'pose'
+        if pose_type == "noface":
+            pose_folder = "pose_noface"
+        else:
+            pose_folder = "pose"
     pose_folder = os.path.join(dirname,'./output/',pose_folder)
     os.makedirs(pose_folder,exist_ok=True)
 
@@ -200,7 +204,7 @@ def inference(align_image, input_video, ref_image, W, H, cfg, seed, steps, skip,
             print("Returning input object as is")
             return obj
 
-    def handle_single(ref_image, input_video, align_image):
+    def handle_single(ref_image, input_video, align_image,L):
         print("handle===", config.motion_module_path)
         align_image_pil = convert_to_pil_image(align_image)
         ref_image_pil = convert_to_pil_image(ref_image)
@@ -222,6 +226,7 @@ def inference(align_image, input_video, ref_image, W, H, cfg, seed, steps, skip,
                 align_image_pil,
                 width,
                 height,
+                pose_type == 'noface'
             )
 
         pose_list = []
@@ -229,7 +234,7 @@ def inference(align_image, input_video, ref_image, W, H, cfg, seed, steps, skip,
         pose_images = read_frames(pose_video_path)
         src_fps = get_fps(pose_video_path)
         print(f"pose video has {len(pose_images)} frames, with {src_fps} fps")
-        L = min(config.L, len(pose_images))
+        L = min(L, len(pose_images))
         pose_transform = transforms.Compose(
             [transforms.Resize((INF_HEIGHT, INF_WIDTH)), transforms.ToTensor()]
         )
@@ -270,6 +275,7 @@ def inference(align_image, input_video, ref_image, W, H, cfg, seed, steps, skip,
             context_frames=24, # video slice frame number
             context_stride=1,
             context_overlap=4, # video slice overlap frame number
+            use_clip=config.use_clip
         ).videos
 
         if grid == True:
@@ -292,7 +298,7 @@ def inference(align_image, input_video, ref_image, W, H, cfg, seed, steps, skip,
         )
         return gr.Video.update(value=video_path)
 
-    return handle_single(ref_image, input_video, align_image)
+    return handle_single(ref_image, input_video, align_image,L)
     
 
 def main():
@@ -339,8 +345,9 @@ def main():
         with gr.Row():
             W = gr.Textbox(label="Width", value=512)
             H = gr.Textbox(label="Height", value=768)
+            L = gr.Textbox(label="video frames", value=48)
             cfg = gr.Textbox(label="cfg(Classifier free guidance)", value=3.5)
-            seed = gr.Textbox(label="seed(DDIM sampling steps)", value=42)
+            seed = gr.Textbox(label="seed", value=42)
             steps = gr.Textbox(label="steps", value=20)
             skip = gr.Textbox(label="skip(Frame Insertion)", value=1)
             grid = gr.Checkbox(label='use grid(show pose in result)', value=1)
@@ -351,7 +358,7 @@ def main():
         ex_data = OmegaConf.to_container(config.examples)
         examples_component = gr.Examples(examples=ex_data, inputs=[align_image, input_video, ref_image],  fn=inference, label="Examples", cache_examples=False, run_on_click=True)
         clean.click(clear_media, [align_image, input_video, ref_image, output_video], [align_image, input_video, ref_image, output_video])
-        run.click(inference, [align_image, input_video, ref_image, W, H, cfg, seed, steps, skip,grid], [output_video])
+        run.click(inference, [align_image, input_video, ref_image, W, H, L,cfg, seed, steps, skip,grid], [output_video])
         get_align_image.click(get_image, input_video, align_image)
     demo.queue()
     demo.launch(share=args.share,
