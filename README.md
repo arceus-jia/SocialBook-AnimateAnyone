@@ -52,7 +52,7 @@ We have implemented this model based on the [AnimateAnyone](https://github.com/H
 You can try it out on our demos page now!
 ![1277035298](https://github.com/arceus-jia/SocialBook-AnimateAnyone/assets/5162767/c0c7cc10-27e5-4abd-9afa-8e711a1d1a51)
 
-<a href = 'http://ai.socialbook.com.cn:48001'>Click to try</a>
+<a href = 'http://animateanyone.socialbook.io:48001'>Click to try</a>
 
 
 ## TODO
