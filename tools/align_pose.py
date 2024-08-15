@@ -98,8 +98,8 @@ def adjust_coordinates(node):
 
 
 def build_tree(pose):
-    
-    bodies = pose['bodies']['candidate']
+
+    bodies = pose["bodies"]["candidate"]
 
     # todo 手，眼睛
     # TODO, 有些节点为空,数值边界
@@ -145,39 +145,39 @@ def build_tree(pose):
     nodes[13] = TreeNode(bodies[13])
     nodes[12].add_child(nodes[13])
 
-    #手 2 21 2, 0右
+    # 手 2 21 2, 0右
     # print ('hands==',pose['hands'])
     # input('x')
-    hand_nodes=[]
-    for single_hand in pose['hands']:
+    hand_nodes = []
+    for single_hand in pose["hands"]:
         single_hand_nodes = [None] * 21
         single_hand_nodes[0] = TreeNode(single_hand[0])
         for i in range(5):
             for j in range(4):
                 idx = i * 4 + j + 1
                 single_hand_nodes[idx] = TreeNode(single_hand[idx])
-                if j == 0: 
+                if j == 0:
                     # print('idx==',idx)
                     single_hand_nodes[0].add_child(single_hand_nodes[idx])
                 else:
-                    single_hand_nodes[idx-1].add_child(single_hand_nodes[idx])  
+                    single_hand_nodes[idx - 1].add_child(single_hand_nodes[idx])
         hand_nodes.append(single_hand_nodes)
 
     nodes[7].add_child(hand_nodes[0][0])
     nodes[4].add_child(hand_nodes[1][0])
     nodes = nodes + hand_nodes[0] + hand_nodes[1]
 
-    #脸
-    faces = pose['faces'][0] #1 12 2
+    # 脸
+    faces = pose["faces"][0]  # 1 12 2
     face_nodes = [None] * 12
     for i in range(6):
         face_nodes[i] = TreeNode(faces[i])
         nodes[14].add_child(face_nodes[i])
 
-        face_nodes[i+6] = TreeNode(faces[i+6])
-        nodes[15].add_child(face_nodes[i+6])        
+        face_nodes[i + 6] = TreeNode(faces[i + 6])
+        nodes[15].add_child(face_nodes[i + 6])
     nodes = nodes + face_nodes
-    
+
     return nodes
 
 
@@ -191,34 +191,36 @@ def get_scales(ref_pose, align_pose):
     for align_node in align_nodes:
         scales.append(align_node.scale)
 
-    print('scales0==',scales)
-    #两只胳膊scale应当一样,不然有几率会越拉越长
-    pairs =[[2,5],[3,6],[4,7],[8,11],[9,12],[10,13],[14,15],[16,17]]
-    for i,j in pairs:
-        s = (scales[i] + scales[j] ) / 2
-        scales[i] = s
-        scales[j] = s
-    
-    #手可以根据肢体长度scale ,不然初始状态影响很大
-    scales[18:60] = [(scales[8] + scales[7])/2] * 42
-
-    #眼睛
-    pairs =[[60,66],[61,67],[62,68],[63,69],[64,70],[65,71]]
-    for i,j in pairs:
-        s = (scales[i] + scales[j] ) / 2
+    print("scales0==", scales)
+    # 两只胳膊scale应当一样,不然有几率会越拉越长
+    pairs = [[2, 5], [3, 6], [4, 7], [8, 11], [9, 12], [10, 13], [14, 15], [16, 17]]
+    for i, j in pairs:
+        s = (scales[i] + scales[j]) / 2
         scales[i] = s
         scales[j] = s
 
-    print('scales1==',scales)
+    # 手可以根据肢体长度scale ,不然初始状态影响很大
+    scales[18:60] = [(scales[8] + scales[7]) / 2] * 42
+
+    # 眼睛
+    pairs = [[60, 66], [61, 67], [62, 68], [63, 69], [64, 70], [65, 71]]
+    for i, j in pairs:
+        s = (scales[i] + scales[j]) / 2
+        scales[i] = s
+        scales[j] = s
+
+    print("scales1==", scales)
+    scales = [1 if math.isnan(i) else i for i in scales]
+
     return scales
 
 
 # 在pose的基础上缩放成ref的尺寸
-def align_frame(pose, ref_pose, scales,offset):
+def align_frame(pose, ref_pose, scales, offset):
     nodes = build_tree(pose)
     for node, scale in zip(nodes, scales):
         node.scale = scale
-        
+
     adjust_coordinates(nodes[1])
     new_pose = []
     for node in nodes:
@@ -226,9 +228,9 @@ def align_frame(pose, ref_pose, scales,offset):
     return new_pose
 
 
-def draw_new_pose(pose, subset, H, W):
+def draw_new_pose(pose, subset, H, W, noface):
     bodies = pose[:18]
-    hands = [pose[18:39],pose[39:60]]
+    hands = [pose[18:39], pose[39:60]]
     eyes = [pose[60:72]]
 
     data = {
@@ -236,11 +238,14 @@ def draw_new_pose(pose, subset, H, W):
         "hands": hands,
         "faces": eyes,
     }
+    if noface == True:
+        data["faces"] = []
     # print('data==',data)
     result = draw_pose_simple(data, H, W)
     return result
 
-def align_image_pose(input_img,ref_img, align_img, W, H):
+
+def align_image_pose(input_img, ref_img, align_img, W, H, noface=False):
     # 统一尺寸(客户端裁剪)
     align_img = crop_center_and_resize(align_img, W, H)
     ref_img = crop_center_and_resize(ref_img, W, H)
@@ -254,21 +259,22 @@ def align_image_pose(input_img,ref_img, align_img, W, H):
 
     align_nodes = build_tree(align_pose)
     ref_nodes = build_tree(ref_pose)
-    offset = [ref_nodes[1].x - align_nodes[1].x, ref_nodes[1].y - align_nodes[1].y]    
+    offset = [ref_nodes[1].x - align_nodes[1].x, ref_nodes[1].y - align_nodes[1].y]
 
     pose, _ = get_pose(input_img)
     subset = pose["bodies"]["subset"]
-    new_pose = align_frame(pose, ref_pose, scales,offset)
+    new_pose = align_frame(pose, ref_pose, scales, offset)
 
-    result = draw_new_pose(new_pose, subset, H, W)
+    result = draw_new_pose(new_pose, subset, H, W, noface)
     return result
 
+
 def handle_image(input_img, output_img, ref_img, align_img, W, H):
-    result = align_image_pose(input_img,ref_img, align_img, W, H)
+    result = align_image_pose(input_img, ref_img, align_img, W, H)
     result.save(output_img)
 
 
-def handle_video(input_video, output_video, ref_img, align_img, W, H):
+def handle_video(input_video, output_video, ref_img, align_img, W, H, noface=False):
     # 统一尺寸(客户端裁剪)
     align_img = crop_center_and_resize(align_img, W, H)
     ref_img = crop_center_and_resize(ref_img, W, H)
@@ -279,11 +285,10 @@ def handle_video(input_video, output_video, ref_img, align_img, W, H):
     align_pose, _ = get_pose(align_img)
     # _.save('alignpose.jpg')
     scales = get_scales(ref_pose, align_pose)
-    
+
     align_nodes = build_tree(align_pose)
     ref_nodes = build_tree(ref_pose)
-    offset = [ref_nodes[1].x - align_nodes[1].x, ref_nodes[1].y - align_nodes[1].y]    
-
+    offset = [ref_nodes[1].x - align_nodes[1].x, ref_nodes[1].y - align_nodes[1].y]
 
     video = VideoFileClip(input_video)
     fps = round(video.fps)
@@ -307,8 +312,8 @@ def handle_video(input_video, output_video, ref_img, align_img, W, H):
 
             pose, _ = get_pose(img)
             subset = pose["bodies"]["subset"]
-            new_pose = align_frame(pose, ref_pose, scales,offset)
-            result = draw_new_pose(new_pose, subset, H, W)
+            new_pose = align_frame(pose, ref_pose, scales, offset)
+            result = draw_new_pose(new_pose, subset, H, W, noface)
             result = np.array(result)
             result = cv2.cvtColor(result, cv2.COLOR_RGB2BGR)
             # print('width,height',width,height,img.shape)

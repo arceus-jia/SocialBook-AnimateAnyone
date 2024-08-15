@@ -1,7 +1,6 @@
 import os, sys
 
 dirname = os.path.dirname(os.path.abspath(__file__))
-sys.path.append(os.path.join(dirname, "../Moore-AnimateAnyone"))
 sys.path.append(os.path.join(dirname, "../"))
 
 import argparse
@@ -170,6 +169,7 @@ def build_tree(pose):
 
     # 脸
     faces = pose["faces"][0]  # 1 68 2
+    # print('faces',faces)
     face_nodes = [None] * 68
 
     # TODO， 鼻子嘴巴这些可以平均
@@ -210,7 +210,8 @@ def get_scales(ref_pose, align_pose):
 
     # 手可以根据肢体长度scale ,不然初始状态影响很大
     scales[18:60] = [(scales[8] + scales[7]) / 2] * 42
-
+    
+    scales = [1 if math.isnan(i) or math.isinf(i) else i for i in scales]
     print("scales1==", scales)
     return scales
 
@@ -220,6 +221,7 @@ def align_frame(pose, ref_pose, scales, offset):
     nodes = build_tree(pose)
     for node, scale in zip(nodes, scales):
         node.scale = scale
+        # print('scale==',scale)
 
     adjust_coordinates(nodes[1])
     new_pose = []
@@ -243,16 +245,16 @@ def draw_new_pose(pose, subset, H, W):
     return result
 
 
-def align_image_pose(input_img,ref_img, align_img, W, H):
+def align_image_pose(input_img,ref_img, align_img, W, H,no_face):
     # 统一尺寸(客户端裁剪)
     align_img = crop_center_and_resize(align_img, W, H)
     ref_img = crop_center_and_resize(ref_img, W, H)
 
     # 获取scale
     ref_pose, _ = get_pose(ref_img)
-    _.save("refpose.jpg")
+    # _.save("refpose.jpg")
     align_pose, _ = get_pose(align_img)
-    _.save("alignpose.jpg")
+    # _.save("alignpose.jpg")
     scales = get_scales(ref_pose, align_pose)
 
     align_nodes = build_tree(align_pose)
@@ -271,7 +273,7 @@ def handle_image(input_img, output_img, ref_img, align_img, W, H):
     result.save(output_img)
 
 
-def handle_video(input_video, output_video, ref_img, align_img, W, H):
+def handle_video(input_video, output_video, ref_img, align_img, W, H,noface):
     # 统一尺寸(客户端裁剪)
     align_img = crop_center_and_resize(align_img, W, H)
     ref_img = crop_center_and_resize(ref_img, W, H)

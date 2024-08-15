@@ -130,13 +130,20 @@ def main():
     args = parse_args()
     config = OmegaConf.load(args.config)
     print("load===")
+    pose_type = config.pose_type
 
-    if config.is_full_pose:
+    if pose_type == "full":
         from tools.align_pose_full import handle_video
-        pose_folder = 'pose_full'
+
+        pose_folder = "pose_full"
     else:
         from tools.align_pose import handle_video
-        pose_folder = 'pose'
+
+        if pose_type == "noface":
+            pose_folder = "pose_noface"
+        else:
+            pose_folder = "pose"
+
     pose_folder = os.path.join(dirname,'../output/',pose_folder)
     os.makedirs(pose_folder,exist_ok=True)
 
@@ -230,6 +237,7 @@ def main():
                 align_image_pil,
                 width,
                 height,
+                pose_type == 'noface'
             )
 
         pose_list = []
@@ -278,6 +286,7 @@ def main():
             context_frames=args.S,
             context_stride=1,
             context_overlap=args.O,
+            use_clip=config.use_clip
         ).videos
 
         if args.grid == True:

@@ -7,14 +7,30 @@ denoising_unet_path: "../pretrained_weights/public_full/denoising_unet.pth"
 reference_unet_path: "../pretrained_weights/public_full/reference_unet.pth"
 pose_guider_path: "../pretrained_weights/public_full/pose_guider.pth"
 motion_module_path: "../pretrained_weights/public_full/motion_module.pth"
-is_full_pose: True
+pose_type: full
+use_clip: true
 
+
+# denoising_unet_path: "/home/ubuntu/ml/sbaa/mymodels/denoising_unet-8100.pth"
+# reference_unet_path: "/home/ubuntu/ml/sbaa/mymodels/reference_unet-8100.pth"
+# pose_guider_path: "/home/ubuntu/ml/sbaa/mymodels/pose_guider-8100.pth"
+# motion_module_path: "/home/ubuntu/ml/sbaa/mymodels/motion_module-7595.pth"
+# pose_type: only_eye
+# use_clip: true
+
+
+# denoising_unet_path: "/data/models/maa/noface_0702/stage1/denoising_unet-7920.pth"
+# reference_unet_path: "/data/models/maa/noface_0702/stage1/reference_unet-7920.pth"
+# pose_guider_path: "/data/models/maa/noface_0702/stage1/pose_guider-7920.pth"
+# motion_module_path: "/data/models/maa/noface_0702/stage2/motion_module-4768.pth"
+# pose_type: noface
+# use_clip: false
 
 inference_config: "../Moore-AnimateAnyone/configs/inference/inference_v2.yaml"
 weight_dtype: 'fp16'
 
 
 test_cases:
-  "../data/images/asuna3.jpg": 
+  "../data/images/test1.jpg": 
     - "../data/videos/ali11.mp4"
     - '../data/align_images/ali11.jpg'
