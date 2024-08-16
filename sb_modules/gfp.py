@@ -42,7 +42,7 @@ class GfpClass:
             paste_back=True,
             weight=0.5,
         )
-        print("gfp cost==", time.time() - st)
+        # print("gfp cost==", time.time() - st)
 
         if isinstance(img, Image.Image):
             restored_img = cv2.cvtColor(restored_img, cv2.COLOR_RGB2BGR)

@@ -25,13 +25,24 @@ import cv2
 import math
 import argparse
 import time
+import traceback
 
 from configs.prompts.test_cases import TestCasesDict
 from src.models.pose_guider import PoseGuider
 from src.models.unet_2d_condition import UNet2DConditionModel
 from src.models.unet_3d import UNet3DConditionModel
 from src.pipelines.pipeline_pose2vid_long import Pose2VideoPipeline
-from src.utils.util import get_fps, read_frames, save_videos_grid
+from src.utils.util import get_fps, read_frames, save_videos_grid,save_videos_from_pil
+
+from sb_modules.gfp import GfpClass
+from sb_modules.inswapper import InswapperClass
+
+gfp = GfpClass()
+gfp.setup()
+inswapper = InswapperClass()
+inswapper.setup()
+
+
 import gradio as gr
 # from align_pose import handle_video
 # from align_pose_full import handle_video
@@ -98,7 +109,7 @@ def scale_video(video, width, height):
     return scaled_video
 
 
-def inference(align_image, input_video, ref_image, W, H,L, cfg, seed, steps, skip,grid):
+def inference(align_image, input_video, ref_image, W, H,L, cfg, seed, steps, skip,grid,restore_face):
     if W is None:
         return
     print("params------------>", W, H, cfg, seed, skip)
@@ -296,10 +307,68 @@ def inference(align_image, input_video, ref_image, W, H,L, cfg, seed, steps, ski
             n_rows=3,
             fps=src_fps if args.fps is None else args.fps,
         )
+        if restore_face == True:
+            denoising_unet = None
+            torch_gc()
+
+            restore_video_path = video_path.split('.mp4')[0] + '_restore.mp4'
+            swap_face(ref_image_pil, video_path,restore_video_path, L)
+            video_path = restore_video_path
+            
         return gr.Video.update(value=video_path)
 
     return handle_single(ref_image, input_video, align_image,L)
     
+
+def swap_face(input_image, input_video,output_video, max_cnt):
+    input_image = np.array(input_image)
+    input_image = cv2.cvtColor(input_image,cv2.COLOR_RGB2BGR)
+    
+    inswapper = InswapperClass()
+    inswapper.setup()
+
+    gfp = GfpClass()
+    gfp.setup()
+
+    st = time.time()
+    cap = cv2.VideoCapture(input_video)
+    fps = get_fps(input_video)
+
+    idx = 0
+    result_images = [] 
+    try:
+        while True:
+            idx += 1
+            success, img = cap.read()
+            if not success:
+                break
+            if img is None:
+                continue
+            result = inswapper.process([input_image], img)
+            result = gfp.simple_restore(result)
+
+            result = cv2.cvtColor(result,cv2.COLOR_BGR2RGB)
+            result_images.append(Image.fromarray(result))
+            if idx >= int(max_cnt):
+                break
+        save_videos_from_pil(result_images,output_video,fps=fps)
+
+    except Exception as e:
+        print("video error:: 行号--", e.__traceback__.tb_lineno)
+        traceback.print_exc()
+    finally:
+        cap.release()
+
+    print('cost::', time.time() - st)
+
+def torch_gc():
+    import gc
+
+    gc.collect()
+    if torch.cuda.is_available():
+        with torch.cuda.device("cuda"):
+            torch.cuda.empty_cache()
+            torch.cuda.ipc_collect()
 
 def main():
     args = parse_args()
@@ -350,6 +419,7 @@ def main():
             seed = gr.Textbox(label="seed", value=42)
             steps = gr.Textbox(label="steps", value=20)
             skip = gr.Textbox(label="skip(Frame Insertion)", value=1)
+            restore_face = gr.Checkbox(label='restore face(only for real person)', value=0)
             grid = gr.Checkbox(label='use grid(show pose in result)', value=1)
         with gr.Row():
             get_align_image = gr.Button("Extract Align Image from video if needed")
@@ -358,7 +428,7 @@ def main():
         ex_data = OmegaConf.to_container(config.examples)
         examples_component = gr.Examples(examples=ex_data, inputs=[align_image, input_video, ref_image],  fn=inference, label="Examples", cache_examples=False, run_on_click=True)
         clean.click(clear_media, [align_image, input_video, ref_image, output_video], [align_image, input_video, ref_image, output_video])
-        run.click(inference, [align_image, input_video, ref_image, W, H, L,cfg, seed, steps, skip,grid], [output_video])
+        run.click(inference, [align_image, input_video, ref_image, W, H, L,cfg, seed, steps, skip,grid,restore_face], [output_video])
         get_align_image.click(get_image, input_video, align_image)
     demo.queue()
     demo.launch(share=args.share,

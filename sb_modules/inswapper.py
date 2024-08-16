@@ -42,7 +42,7 @@ class InswapperClass:
     def get_one_face(self, frame: np.ndarray):
         face = self.fa.get(frame)
         try:
-            return min(face, key=lambda x: x.bbox[0])
+            return max(face, key=lambda x: x.bbox[0])
         except ValueError:
             return None
 
@@ -86,5 +86,5 @@ class InswapperClass:
         # result_img = Image.fromarray(cv2.cvtColor(tmp_img, cv2.COLOR_BGR2RGB))
         result_img = tmp_img
 
-        print('swap cost::', time.time()-st)
+        # print('swap cost::', time.time()-st)
         return result_img
