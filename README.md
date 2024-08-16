@@ -120,6 +120,13 @@ wget -O pretrained_weights/gfp/GFPGANv1.4.pth https://github.com/TencentARC/GFPG
     └── diffusion_pytorch_model.bin
 ```
 
+```
+中国的同学们也可以使用百度网盘直接下载所有权重文件
+链接: https://pan.baidu.com/s/1gyWmFiEaOMw-vnuRr6UJew  密码: d669
+
+```
+
+
 ## Quickstart
 ### Inference
 #### Prepare Data
