@@ -48,11 +48,15 @@ We have implemented this model based on the [AnimateAnyone](https://github.com/H
 </tr>
 </table>
 
-## Try it online
+<!-- ## Try it online
 You can try it out on our demos page now!
 ![1277035298](https://github.com/arceus-jia/SocialBook-AnimateAnyone/assets/5162767/c0c7cc10-27e5-4abd-9afa-8e711a1d1a51)
 
-<a href = 'http://animateanyone.socialbook.io:48001'>Click to try</a>
+<a href = 'http://animateanyone.socialbook.io:48001'>Click to try</a> -->
+
+## Windows整合包
+感谢b站用户 PeterPan369 为此项目制作的整合包。有需要的朋友可以自行下载使用，建议使用7-zip解压
+https://pan.baidu.com/s/1Q_aDp_N2CSz-rqk7gIfKiQ?pwd=3u82 
 
 
 ## TODO
